@@ -59,14 +59,18 @@ export function Topbar({ onMenuToggle }) {
 
       {/* User info */}
       {user && (
-        <div className="flex items-center gap-2 pl-2">
+        <button
+          onClick={() => navigate('/profile')}
+          className="flex items-center gap-2 pl-2 rounded-md hover:bg-slate-50 transition-colors"
+          aria-label="Open profile"
+        >
           <div className="hidden sm:block text-right">
             <p className="text-xs font-semibold text-slate-700 leading-tight">{user.name?.split(' ')[0]}</p>
           </div>
           <div className="w-7 h-7 rounded-full bg-navy-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
             {user.name?.charAt(0)}
           </div>
-        </div>
+        </button>
       )}
     </header>
   );

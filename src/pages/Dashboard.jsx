@@ -52,7 +52,7 @@ export default function Dashboard() {
       <div>
         <h1 className="text-xl font-bold text-slate-800">
           {user?.role === 'CENTRAL_OFFICER' ? 'National Overview' :
-           user?.role === 'STATE_OFFICER' ? `${user.state} Dashboard` :
+           user?.role === 'STATE_OFFICER' ? (user.state ? `${user.state} Dashboard` : 'State Officer Dashboard') :
            'Project Dashboard'}
         </h1>
         <p className="text-sm text-slate-500 mt-0.5">Land acquisition status across all active projects</p>

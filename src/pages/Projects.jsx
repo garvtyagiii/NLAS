@@ -6,21 +6,10 @@ import { Card, Badge, Skeleton, SkeletonTable, EmptyState, ErrorState, ProgressB
 import { getStatusLabel, getStatusColor, formatArea, formatDate } from '../utils/format.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { can } from '../utils/permissions.js';
+import { INDIA_STATES_AND_UTS, MAJOR_DISTRICTS_BY_STATE } from '../utils/locations.js';
 import ProjectFormModal from '../components/projects/ProjectFormModal.jsx';
 
 const PROJECT_TYPES = ['HIGHWAY', 'RAILWAY', 'INDUSTRIAL', 'POWER', 'PORT', 'IRRIGATION', 'URBAN', 'OTHER'];
-const STATES = ['Uttar Pradesh', 'Maharashtra', 'Rajasthan', 'Karnataka', 'Tamil Nadu', 'Gujarat', 'Bihar', 'Haryana', 'Madhya Pradesh'];
-const DISTRICTS_BY_STATE = {
-  'Uttar Pradesh': ['Ghaziabad', 'Agra', 'Hapur', 'Meerut'],
-  Maharashtra: ['Mumbai', 'Pune', 'Nashik'],
-  Rajasthan: ['Jaisalmer', 'Jaipur', 'Udaipur'],
-  Karnataka: ['Bengaluru Urban', 'Mysuru'],
-  'Tamil Nadu': ['Chennai', 'Coimbatore'],
-  Gujarat: ['Ahmedabad', 'Surat'],
-  Bihar: ['Patna', 'Gaya'],
-  Haryana: ['Gurugram', 'Faridabad'],
-  'Madhya Pradesh': ['Bhopal', 'Indore'],
-};
 const STATUSES = ['DRAFT', 'SUBMITTED', 'UNDER_SCRUTINY', 'APPROVED', 'NOTIFICATION', 'AWARD', 'COMPENSATION', 'POSSESSION', 'R&R', 'CLOSED'];
 
 export default function Projects() {
@@ -37,13 +26,14 @@ export default function Projects() {
 
   // Filter state
   const [search, setSearch] = useState(searchParams.get('search') || '');
-  const [state, setState] = useState('');
+  const isStateOfficer = user?.role === 'STATE_OFFICER';
+  const [state, setState] = useState(isStateOfficer ? user.state || '' : '');
   const [district, setDistrict] = useState('');
   const [status, setStatus] = useState('');
   const [type, setType] = useState('');
   const [page, setPage] = useState(1);
 
-  const districtOptions = state ? DISTRICTS_BY_STATE[state] || [] : [];
+  const districtOptions = state ? MAJOR_DISTRICTS_BY_STATE[state] || [] : [];
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -105,8 +95,8 @@ export default function Projects() {
             />
           </div>
           <select value={state} onChange={e => { setState(e.target.value); setDistrict(''); setPage(1); }} className="form-input">
-            <option value="">All States</option>
-            {STATES.map(s => <option key={s} value={s}>{s}</option>)}
+            {!isStateOfficer && <option value="">All States</option>}
+            {INDIA_STATES_AND_UTS.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
           <select value={district} onChange={e => { setDistrict(e.target.value); setPage(1); }} className="form-input" disabled={!state}>
             <option value="">All Districts</option>

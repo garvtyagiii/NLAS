@@ -15,11 +15,15 @@ const respond = (data) => ({ data });
 
 export const mockService = {
   // Auth
-  login: async ({ email }) => {
+  login: async ({ email, name, role, state }) => {
     await delay(600);
-    // Accept any credentials in mock mode; adjust role by email keyword
+    // Accept any credentials in mock mode and use the entered identity.
     const response = JSON.parse(JSON.stringify(mockAuthResponse));
-    if (email.includes('state')) response.data.user.role = 'STATE_OFFICER';
+    response.data.user.name = name.trim();
+    response.data.user.email = email;
+    response.data.user.state = state || null;
+    if (role) response.data.user.role = role;
+    else if (email.includes('state')) response.data.user.role = 'STATE_OFFICER';
     else if (email.includes('district')) response.data.user.role = 'DISTRICT_OFFICER';
     else if (email.includes('field')) response.data.user.role = 'FIELD_OFFICER';
     return respond(response);
@@ -140,7 +144,13 @@ export const mockService = {
   },
   resolveObjection: async (id, payload) => {
     await delay(600);
-    return respond({ success: true, data: { id, status: 'RESOLVED', ...payload } });
+    const objection = mockObjections.data.find(item => item.id === id);
+    if (objection) {
+      const wasOpen = objection.status === 'OPEN';
+      Object.assign(objection, { ...payload, status: 'RESOLVED' });
+      if (wasOpen && mockProject.data.openObjections > 0) mockProject.data.openObjections -= 1;
+    }
+    return respond({ success: true, data: objection || { id, status: 'RESOLVED', ...payload } });
   },
 
   // Audit

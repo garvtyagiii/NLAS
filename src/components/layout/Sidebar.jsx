@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, FolderOpen, Bell, LogOut, ChevronRight,
+  LayoutDashboard, FolderOpen, Bell, LogOut, UserRound,
   Map, Shield, FileText, Users, X, Menu,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/projects', icon: FolderOpen, label: 'Projects' },
   { to: '/alerts', icon: Bell, label: 'Alerts' },
+  { to: '/profile', icon: UserRound, label: 'Profile' },
 ];
 
 function NavItem({ to, icon: Icon, label, onClick }) {

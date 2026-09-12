@@ -5,17 +5,27 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Shield, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { INDIA_STATES_AND_UTS } from '../utils/locations.js';
 
 const schema = z.object({
+  name: z.string().trim().min(2, 'Enter your name'),
   email: z.string().email('Enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
+  role: z.enum(['CENTRAL_OFFICER', 'STATE_OFFICER', 'DISTRICT_OFFICER', 'FIELD_OFFICER'], {
+    required_error: 'Select your officer position',
+  }),
+  state: z.string().optional(),
+}).superRefine((values, context) => {
+  if (values.role === 'STATE_OFFICER' && !values.state) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ['state'], message: 'Select your state' });
+  }
 });
 
 const DEMO_CREDENTIALS = [
-  { role: 'Central Officer', email: 'rajesh.sharma@nlas.gov.in', password: 'Demo@1234' },
-  { role: 'State Officer', email: 'state.officer@nlas.gov.in', password: 'Demo@1234' },
-  { role: 'District Officer', email: 'district.officer@nlas.gov.in', password: 'Demo@1234' },
-  { role: 'Field Officer', email: 'field.officer@nlas.gov.in', password: 'Demo@1234' },
+  { role: 'Central Officer', roleValue: 'CENTRAL_OFFICER', name: 'Central Officer', email: 'rajesh.sharma@nlas.gov.in', password: 'Demo@1234' },
+  { role: 'State Officer', roleValue: 'STATE_OFFICER', name: 'State Officer', email: 'state.officer@nlas.gov.in', password: 'Demo@1234', state: 'Uttar Pradesh' },
+  { role: 'District Officer', roleValue: 'DISTRICT_OFFICER', name: 'District Officer', email: 'district.officer@nlas.gov.in', password: 'Demo@1234' },
+  { role: 'Field Officer', roleValue: 'FIELD_OFFICER', name: 'Field Officer', email: 'field.officer@nlas.gov.in', password: 'Demo@1234' },
 ];
 
 export default function Login() {
@@ -27,9 +37,10 @@ export default function Login() {
 
   const from = location.state?.from?.pathname || '/dashboard';
 
-  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm({
+  const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(schema),
   });
+  const selectedRole = watch('role');
 
   const onSubmit = async (data) => {
     setApiError('');
@@ -48,8 +59,11 @@ export default function Login() {
   };
 
   const fillDemo = (cred) => {
+    setValue('name', cred.name);
     setValue('email', cred.email);
     setValue('password', cred.password);
+    setValue('role', cred.roleValue);
+    setValue('state', cred.state || '');
     setApiError('');
   };
 
@@ -109,6 +123,24 @@ export default function Login() {
           <p className="text-slate-500 text-sm mb-8">Use your official government credentials</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Name */}
+            <div>
+              <label htmlFor="name" className="block text-xs font-medium text-slate-700 mb-1.5">
+                Your Name
+              </label>
+              <input
+                id="name"
+                type="text"
+                autoComplete="name"
+                placeholder="Garv"
+                {...register('name')}
+                className={`form-input ${errors.name ? 'error' : ''}`}
+              />
+              {errors.name && (
+                <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+              )}
+            </div>
+
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-xs font-medium text-slate-700 mb-1.5">
@@ -126,6 +158,49 @@ export default function Login() {
                 <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
               )}
             </div>
+
+            {/* Officer position */}
+            <div>
+              <label htmlFor="role" className="block text-xs font-medium text-slate-700 mb-1.5">
+                Officer Position
+              </label>
+              <select
+                id="role"
+                {...register('role')}
+                className={`form-input ${errors.role ? 'error' : ''}`}
+                defaultValue=""
+              >
+                <option value="" disabled>Select your position</option>
+                <option value="CENTRAL_OFFICER">Central Officer</option>
+                <option value="STATE_OFFICER">State Officer</option>
+                <option value="DISTRICT_OFFICER">District Officer</option>
+                <option value="FIELD_OFFICER">Field Officer</option>
+              </select>
+              {errors.role && (
+                <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>
+              )}
+            </div>
+
+            {/* Password */}
+            {selectedRole === 'STATE_OFFICER' && (
+              <div>
+                <label htmlFor="state" className="block text-xs font-medium text-slate-700 mb-1.5">
+                  State
+                </label>
+                <select
+                  id="state"
+                  {...register('state')}
+                  className={`form-input ${errors.state ? 'error' : ''}`}
+                  defaultValue=""
+                >
+                  <option value="" disabled>Select your state</option>
+                  {INDIA_STATES_AND_UTS.map(state => <option key={state} value={state}>{state}</option>)}
+                </select>
+                {errors.state && (
+                  <p className="text-red-500 text-xs mt-1">{errors.state.message}</p>
+                )}
+              </div>
+            )}
 
             {/* Password */}
             <div>

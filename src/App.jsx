@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
@@ -12,6 +12,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
 const Projects = lazy(() => import('./pages/Projects.jsx'));
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail.jsx'));
 const Alerts = lazy(() => import('./pages/Alerts.jsx'));
+const Profile = lazy(() => import('./pages/Profile.jsx'));
 
 function PageLoader() {
   return (
@@ -23,7 +24,7 @@ function PageLoader() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AuthProvider>
         <ToastProvider>
           <Suspense fallback={<PageLoader />}>
@@ -44,6 +45,7 @@ export default function App() {
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/projects/:id" element={<ProjectDetail />} />
                 <Route path="/alerts" element={<Alerts />} />
+                <Route path="/profile" element={<Profile />} />
               </Route>
 
               {/* Fallback */}
@@ -52,6 +54,6 @@ export default function App() {
           </Suspense>
         </ToastProvider>
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
